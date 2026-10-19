@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Capitals d'Europa - Viquiprojecte</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts - Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+
+    .flag-shadow {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-enter {
+      animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .shake {
+      animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-1px, 0, 0); }
+      20%, 80% { transform: translate3d(2px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+      40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+
+    .pulse-success {
+      animation: pulseGreen 0.5s ease-out;
+    }
+
+    @keyframes pulseGreen {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+      70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-slate-50 text-slate-800">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 py-3 sm:px-6 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="bg-blue-600 text-white p-2.5 rounded-xl shadow-md flex items-center justify-center">
+          <i class="fa-solid me-0 fa-earth-europe text-xl"></i>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-lg sm:text-xl text-slate-900 leading-tight">Capitals d'Europa</h1>
+          <p class="text-xs text-slate-500 font-medium hidden sm:block">Basat en el Viquiprojecte de Capitals Europees</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <!-- Sound toggle button -->
+        <button id="soundToggleBtn" onclick="toggleSound()" class="px-3 py-2 text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-semibold transition-all flex items-center space-x-1.5" title="Activar/Desactivar So">
+          <i id="soundIcon" class="fa-solid fa-volume-high text-blue-600"></i>
+          <span class="hidden md:inline">So</span>
+        </button>
+
+        <!-- Study List Button -->
+        <button onclick="openStudyModal()" class="px-3.5 py-2 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 rounded-xl text-xs font-semibold transition-all border border-slate-200 flex items-center space-x-1.5">
+          <i class="fa-solid fa-book-open text-blue-600"></i>
+          <span class="hidden sm:inline">Llista completa</span>
+        </button>
+
+        <!-- Restart Round Button -->
+        <button onclick="resetGamePrompt()" class="px-3.5 py-2 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 rounded-xl text-xs font-semibold transition-all border border-slate-200 flex items-center space-x-1.5">
+          <i class="fa-solid fa-rotate-right text-rose-500"></i>
+          <span class="hidden sm:inline">Reiniciar</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-3xl mx-auto w-full px-4 py-6 sm:py-8 flex-grow">
+    
+    <!-- Scoreboard and Progress Header -->
+    <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80 mb-6 card-enter">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center mb-4">
+        <!-- Encerts -->
+        <div class="bg-emerald-50/70 border border-emerald-100 rounded-xl p-2.5">
+          <div class="text-xs font-bold uppercase tracking-wider text-emerald-700 flex items-center justify-center space-x-1">
+            <i class="fa-solid fa-circle-check text-emerald-500"></i>
+            <span>Encerts</span>
+          </div>
+          <div id="scoreCorrect" class="text-xl sm:text-2xl font-black text-emerald-800 mt-1">0</div>
+        </div>
+
+        <!-- Errors -->
+        <div class="bg-rose-50/70 border border-rose-100 rounded-xl p-2.5">
+          <div class="text-xs font-bold uppercase tracking-wider text-rose-700 flex items-center justify-center space-x-1">
+            <i class="fa-solid fa-circle-xmark text-rose-500"></i>
+            <span>Errors</span>
+          </div>
+          <div id="scoreIncorrect" class="text-xl sm:text-2xl font-black text-rose-800 mt-1">0</div>
+        </div>
+
+        <!-- Ràtxa -->
+        <div class="bg-amber-50/70 border border-amber-100 rounded-xl p-2.5">
+          <div class="text-xs font-bold uppercase tracking-wider text-amber-700 flex items-center justify-center space-x-1">
+            <i class="fa-solid fa-fire text-amber-500"></i>
+            <span>Ràtxa</span>
+          </div>
+          <div id="scoreStreak" class="text-xl sm:text-2xl font-black text-amber-800 mt-1">0</div>
+        </div>
+
+        <!-- Progress -->
+        <div class="bg-blue-50/70 border border-blue-100 rounded-xl p-2.5">
+          <div class="text-xs font-bold uppercase tracking-wider text-blue-700 flex items-center justify-center space-x-1">
+            <i class="fa-solid fa-flag text-blue-500"></i>
+            <span>Restants</span>
+          </div>
+          <div id="remainingCount" class="text-xl sm:text-2xl font-black text-blue-800 mt-1">49 / 49</div>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="space-y-1.5">
+        <div class="flex justify-between items-center text-xs text-slate-500 font-medium">
+          <span>Progrés de la ronda actual</span>
+          <span id="progressPercentage">0%</span>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+          <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flashcard Game Box -->
+    <div id="gameCard" class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden card-enter">
+      
+      <!-- Country Banner & Flag -->
+      <div class="bg-gradient-to-b from-slate-100 to-white p-6 sm:p-8 text-center border-b border-slate-100 relative">
+        <!-- Badge index -->
+        <span id="countryBadge" class="absolute top-4 left-4 inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+          País 1 de 49
+        </span>
+
+        <!-- Flag Image Container -->
+        <div class="mt-2 mb-4 inline-block">
+          <div class="relative w-40 sm:w-48 h-28 sm:h-32 rounded-xl overflow-hidden flag-shadow border-2 border-white bg-slate-200 transition-transform duration-300 hover:scale-105">
+            <img id="countryFlag" src="" alt="Bandera del país" class="w-full h-full object-cover object-center" onerror="this.src='https://via.placeholder.com/320x200?text=Bandera+no+disponible'">
+          </div>
+        </div>
+
+        <!-- Country Name -->
+        <h2 id="countryName" class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          Carregant...
+        </h2>
+        <p class="text-sm text-slate-500 font-medium mt-1">Quina és la seva capital?</p>
+      </div>
+
+      <!-- Interactive Form Section -->
+      <div class="p-6 sm:p-8 space-y-6">
+        <form id="answerForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+          <div class="relative">
+            <input 
+              type="text" 
+              id="capitalInput" 
+              placeholder="Escriu el nom de la capital..." 
+              autocomplete="off"
+              autofocus
+              class="w-full px-5 py-4 text-base sm:text-lg bg-slate-50 border-2 border-slate-200 focus:border-blue-600 focus:bg-white rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all text-slate-900 font-medium placeholder-slate-400"
+            />
+            <button 
+              type="button" 
+              id="hintBtn" 
+              onclick="showHint()" 
+              class="absolute right-3 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg text-xs font-bold transition-all flex items-center space-x-1"
+              title="Demanar una pista"
+            >
+              <i class="fa-solid fa-lightbulb text-amber-600"></i>
+              <span>Pista</span>
+            </button>
+          </div>
+
+          <!-- Hint display area -->
+          <div id="hintBox" class="hidden p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 font-medium flex items-center space-x-2">
+            <i class="fa-solid fa-circle-info text-amber-600 text-sm"></i>
+            <span id="hintText">Pista: Comença per...</span>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            <button 
+              type="submit" 
+              id="checkBtn" 
+              class="w-full py-3.5 px-6 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center space-x-2 text-base"
+            >
+              <i class="fa-solid fa-check text-lg"></i>
+              <span>Comprovar</span>
+            </button>
+
+            <button 
+              type="button" 
+              id="nextBtn" 
+              onclick="nextCountry()" 
+              disabled
+              class="w-full py-3.5 px-6 bg-slate-200 text-slate-400 font-bold rounded-xl transition-all flex items-center justify-center space-x-2 text-base cursor-not-allowed"
+            >
+              <span>Nou país</span>
+              <i class="fa-solid fa-arrow-right text-lg"></i>
+            </button>
+          </div>
+        </form>
+
+        <!-- Feedback Box -->
+        <div id="feedbackBox" class="hidden p-4 rounded-xl text-sm font-semibold border flex items-start space-x-3 transition-all">
+          <i id="feedbackIcon" class="fa-solid text-xl mt-0.5"></i>
+          <div id="feedbackContent" class="flex-grow">
+            <!-- Dynamic feedback message -->
+          </div>
+        </div>
+
+        <!-- Technical Card ("Fitxa Tècnica") -->
+        <div id="techCard" class="hidden bg-slate-50 border-2 border-slate-200 rounded-2xl p-5 sm:p-6 card-enter">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
+            <div class="flex items-center space-x-2">
+              <span class="p-2 bg-blue-600 text-white rounded-lg text-xs">
+                <i class="fa-solid fa-city"></i>
+              </span>
+              <h3 class="font-bold text-slate-900 text-base sm:text-lg">Fitxa Tècnica de la Capital</h3>
+            </div>
+            <span id="techCardCapitalName" class="font-extrabold text-blue-600 text-base sm:text-lg">
+              <!-- Capital Name -->
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Habitants -->
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-3">
+              <div class="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
+                <i class="fa-solid fa-users text-lg"></i>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Habitants</p>
+                <p id="techCardPopulation" class="font-bold text-slate-800 text-sm mt-0.5">-</p>
+              </div>
+            </div>
+
+            <!-- Gentilici -->
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-3">
+              <div class="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
+                <i class="fa-solid fa-id-card text-lg"></i>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Gentilici</p>
+                <p id="techCardDemonym" class="font-bold text-slate-800 text-sm mt-0.5">-</p>
+              </div>
+            </div>
+
+            <!-- Idioma Oficial -->
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-3">
+              <div class="p-2.5 bg-amber-50 text-amber-600 rounded-xl">
+                <i class="fa-solid fa-language text-lg"></i>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Idioma Oficial</p>
+                <p id="techCardLanguages" class="font-bold text-slate-800 text-sm mt-0.5">-</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+    <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
+      <p>Aplicació educativa per a la pràctica de la geografia europea.</p>
+      <p class="font-medium text-slate-600">Font de dades: Viquipèdia / Viquiprojecte</p>
+    </div>
+  </footer>
+
+  <!-- Study Modal (Llista completa de països) -->
+  <div id="studyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] flex flex-col overflow-hidden border border-slate-200 card-enter">
+      
+      <!-- Modal Header -->
+      <div class="p-5 bg-slate-900 text-white flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+          <i class="fa-solid fa-list-check text-xl text-blue-400"></i>
+          <div>
+            <h3 class="font-bold text-lg">Llista completa de Capitals Europees</h3>
+            <p class="text-xs text-slate-400">Tots els 49 països i les seves capitals</p>
+          </div>
+        </div>
+        <button onclick="closeStudyModal()" class="text-slate-400 hover:text-white p-2 rounded-xl transition-all">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+
+      <!-- Search input -->
+      <div class="p-4 bg-slate-50 border-b border-slate-200">
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input 
+            type="text" 
+            id="modalSearchInput" 
+            oninput="filterStudyList()" 
+            placeholder="Buscar país o capital..." 
+            class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+        </div>
+      </div>
+
+      <!-- Table content -->
+      <div class="overflow-y-auto p-4 flex-grow">
+        <table class="w-full text-left text-sm border-collapse">
+          <thead>
+            <tr class="border-b border-slate-200 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <th class="py-2.5 px-3">Bandera</th>
+              <th class="py-2.5 px-3">País</th>
+              <th class="py-2.5 px-3">Capital</th>
+              <th class="py-2.5 px-3 hidden sm:table-cell">Idioma</th>
+            </tr>
+          </thead>
+          <tbody id="studyTableBody" class="divide-y divide-slate-100 font-medium">
+            <!-- Dynamic rows -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button onclick="closeStudyModal()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all">
+          Tancar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Round Complete Celebration Modal -->
+  <div id="roundCompleteModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-8 text-center border border-slate-100 card-enter">
+      <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner">
+        <i class="fa-solid fa-trophy text-4xl"></i>
+      </div>
+
+      <h3 class="text-2xl font-black text-slate-900 mb-2">Felicitats! 🎉</h3>
+      <p class="text-sm text-slate-600 font-medium mb-6">
+        Has practicat amb tots els <span class="font-bold text-slate-900">49 països d'Europa</span> de la llista sense repetir-ne cap!
+      </p>
+
+      <!-- Stats Summary -->
+      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-6 grid grid-cols-2 gap-3 text-left">
+        <div>
+          <p class="text-xs text-slate-400 font-semibold uppercase">Encerts totals</p>
+          <p id="modalFinalCorrect" class="text-xl font-bold text-emerald-600 mt-0.5">0</p>
+        </div>
+        <div>
+          <p class="text-xs text-slate-400 font-semibold uppercase">Errors totals</p>
+          <p id="modalFinalIncorrect" class="text-xl font-bold text-rose-600 mt-0.5">0</p>
+        </div>
+        <div>
+          <p class="text-xs text-slate-400 font-semibold uppercase">Precisió</p>
+          <p id="modalFinalAccuracy" class="text-xl font-bold text-blue-600 mt-0.5">0%</p>
+        </div>
+        <div>
+          <p class="text-xs text-slate-400 font-semibold uppercase">Millor Ràtxa</p>
+          <p id="modalFinalBestStreak" class="text-xl font-bold text-amber-600 mt-0.5">0</p>
+        </div>
+      </div>
+
+      <button onclick="startNewRound()" class="w-full py-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-extrabold rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2 text-base">
+        <i class="fa-solid fa-rotate-right"></i>
+        <span>Començar una nova ronda</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Complete database of 49 European countries & capitals from https://ca.wikipedia.org/wiki/Viquiprojecte:Capitals_europees
+    const COUNTRIES_DATA = [
+      {
+        country: "Albània",
+        capital: "Tirana",
+        flagCode: "al",
+        accepted: ["Tirana"],
+        population: "550.000 habitants",
+        demonym: "tiranès, tiranesa",
+        languages: "Albanès"
+      },
+      {
+        country: "Alemanya",
+        capital: "Berlín",
+        flagCode: "de",
+        accepted: ["Berlín", "Berlin"],
+        population: "3,6 milions d'habitants",
+        demonym: "berlinès, berlinesa",
+        languages: "Alemany"
+      },
+      {
+        country: "Andorra",
+        capital: "Andorra la Vella",
+        flagCode: "ad",
+        accepted: ["Andorra la Vella", "Andorra la vella"],
+        population: "23.000 habitants",
+        demonym: "andorrà, andorrana",
+        languages: "Català"
+      },
+      {
+        country: "Armènia",
+        capital: "Erevan",
+        flagCode: "am",
+        accepted: ["Erevan", "Yerevan"],
+        population: "1,1 milions d'habitants",
+        demonym: "erevanès, erevanesa",
+        languages: "Armeni"
+      },
+      {
+        country: "Àustria",
+        capital: "Viena",
+        flagCode: "at",
+        accepted: ["Viena", "Vienna"],
+        population: "1,9 milions d'habitants",
+        demonym: "vienès, vienesa",
+        languages: "Alemany"
+      },
+      {
+        country: "Belarús",
+        capital: "Minsk",
+        flagCode: "by",
+        accepted: ["Minsk"],
+        population: "2 milions d'habitants",
+        demonym: "minsker",
+        languages: "Belarús i rus"
+      },
+      {
+        country: "Bulgària",
+        capital: "Sofia",
+        flagCode: "bg",
+        accepted: ["Sofia", "Sòfia"],
+        population: "1,2 milions d'habitants",
+        demonym: "sofià, sofiana",
+        languages: "Búlgar"
+      },
+      {
+        country: "Bèlgica",
+        capital: "Brussel·les",
+        flagCode: "be",
+        accepted: ["Brussel·les", "Brusselles", "Brussels"],
+        population: "1,2 milions d'habitants",
+        demonym: "brussel·lès, brussel·lesa",
+        languages: "Neerlandès, francès i alemany"
+      },
+      {
+        country: "Bòsnia i Hercegovina",
+        capital: "Sarajevo",
+        flagCode: "ba",
+        accepted: ["Sarajevo"],
+        population: "275.000 habitants",
+        demonym: "sarajevès, sarajevesa",
+        languages: "Bosni, croat i serbi"
+      },
+      {
+        country: "Croàcia",
+        capital: "Zagreb",
+        flagCode: "hr",
+        accepted: ["Zagreb"],
+        population: "770.000 habitants",
+        demonym: "zagrebrès, zagrebresa",
+        languages: "Croat"
+      },
+      {
+        country: "Dinamarca",
+        capital: "Copenhaguen",
+        flagCode: "dk",
+        accepted: ["Copenhaguen", "Copenhagen"],
+        population: "640.000 habitants",
+        demonym: "copenhaguer, copenhaguera",
+        languages: "Danès"
+      },
+      {
+        country: "Eslovàquia",
+        capital: "Bratislava",
+        flagCode: "sk",
+        accepted: ["Bratislava"],
+        population: "475.000 habitants",
+        demonym: "bratislau, bratislava",
+        languages: "Eslovac"
+      },
+      {
+        country: "Eslovènia",
+        capital: "Ljubljana",
+        flagCode: "si",
+        accepted: ["Ljubljana", "Liubliana"],
+        population: "290.000 habitants",
+        demonym: "liublianès, liublianesa",
+        languages: "Eslovè"
+      },
+      {
+        country: "Espanya",
+        capital: "Madrid",
+        flagCode: "es",
+        accepted: ["Madrid"],
+        population: "3,3 milions d'habitants",
+        demonym: "madrileny, madrilenya",
+        languages: "Castellà"
+      },
+      {
+        country: "Estònia",
+        capital: "Tallinn",
+        flagCode: "ee",
+        accepted: ["Tallinn", "Talin", "Tallin"],
+        population: "440.000 habitants",
+        demonym: "tallinnès, tallinnesa",
+        languages: "Estonià"
+      },
+      {
+        country: "Finlàndia",
+        capital: "Hèlsinki",
+        flagCode: "fi",
+        accepted: ["Hèlsinki", "Helsinki"],
+        population: "660.000 habitants",
+        demonym: "helsinkià, helsinkiana",
+        languages: "Finès i suec"
+      },
+      {
+        country: "França",
+        capital: "París",
+        flagCode: "fr",
+        accepted: ["París", "Paris"],
+        population: "2,1 milions d'habitants",
+        demonym: "parisià, parisiana",
+        languages: "Francès"
+      },
+      {
+        country: "Geòrgia",
+        capital: "Tbilisi",
+        flagCode: "ge",
+        accepted: ["Tbilisi", "Tbilissi"],
+        population: "1,1 milions d'habitants",
+        demonym: "tbilisès, tbilisesa",
+        languages: "Georgià"
+      },
+      {
+        country: "Grècia",
+        capital: "Atenes",
+        flagCode: "gr",
+        accepted: ["Atenes", "Atenas"],
+        population: "3,1 milions d'habitants",
+        demonym: "atenenc, atenenca",
+        languages: "Grec"
+      },
+      {
+        country: "Hongria",
+        capital: "Budapest",
+        flagCode: "hu",
+        accepted: ["Budapest"],
+        population: "1,7 milions d'habitants",
+        demonym: "budapestí, budapestina",
+        languages: "Hongarès"
+      },
+      {
+        country: "Irlanda",
+        capital: "Dublín",
+        flagCode: "ie",
+        accepted: ["Dublín", "Dublin"],
+        population: "590.000 habitants",
+        demonym: "dublinès, dublinesa",
+        languages: "Irlandès i anglès"
+      },
+      {
+        country: "Islàndia",
+        capital: "Reykjavík",
+        flagCode: "is",
+        accepted: ["Reykjavík", "Reykjavik"],
+        population: "135.000 habitants",
+        demonym: "reykjavikià, reykjavikiana",
+        languages: "Islandès"
+      },
+      {
+        country: "Itàlia",
+        capital: "Roma",
+        flagCode: "it",
+        accepted: ["Roma"],
+        population: "2,8 milions d'habitants",
+        demonym: "romà, romana",
+        languages: "Italià"
+      },
+      {
+        country: "Kosovo",
+        capital: "Pristina",
+        flagCode: "xk",
+        accepted: ["Pristina", "Prishtina"],
+        population: "200.000 habitants",
+        demonym: "pristinès, pristinesa",
+        languages: "Albanès i serbi"
+      },
+      {
+        country: "Letònia",
+        capital: "Riga",
+        flagCode: "lv",
+        accepted: ["Riga"],
+        population: "605.000 habitants",
+        demonym: "riguès, riguesa",
+        languages: "Letó"
+      },
+      {
+        country: "Liechtenstein",
+        capital: "Vaduz",
+        flagCode: "li",
+        accepted: ["Vaduz"],
+        population: "5.700 habitants",
+        demonym: "vaduzès, vaduzesa",
+        languages: "Alemany"
+      },
+      {
+        country: "Lituània",
+        capital: "Vílnius",
+        flagCode: "lt",
+        accepted: ["Vílnius", "Vilnius"],
+        population: "580.000 habitants",
+        demonym: "vilniès, vilniesa",
+        languages: "Lituà"
+      },
+      {
+        country: "Luxemburg",
+        capital: "Luxemburg",
+        flagCode: "lu",
+        accepted: ["Luxemburg"],
+        population: "130.000 habitants",
+        demonym: "luxemburguès, luxemburguesa",
+        languages: "Luxemburguès, francès i alemany"
+      },
+      {
+        country: "Macedònia del Nord",
+        capital: "Skopje",
+        flagCode: "mk",
+        accepted: ["Skopje", "Escòpia"],
+        population: "540.000 habitants",
+        demonym: "skopjà, skopjana",
+        languages: "Macedoni i albanès"
+      },
+      {
+        country: "Malta",
+        capital: "Valetta",
+        flagCode: "mt",
+        accepted: ["Valetta", "La Valleta", "Valleta", "La Valeta"],
+        population: "5.800 habitants",
+        demonym: "valletà, valletana",
+        languages: "Maltès i anglès"
+      },
+      {
+        country: "Moldàvia",
+        capital: "Chisinau",
+        flagCode: "md",
+        accepted: ["Chisinau", "Chișinău"],
+        population: "530.000 habitants",
+        demonym: "chisinauès, chisinauesa",
+        languages: "Romanès"
+      },
+      {
+        country: "Mònaco",
+        capital: "Mònaco",
+        flagCode: "mc",
+        accepted: ["Mònaco", "Monaco"],
+        population: "39.000 habitants",
+        demonym: "monegasc, monegasca",
+        languages: "Francès"
+      },
+      {
+        country: "Montenegro",
+        capital: "Podgorica",
+        flagCode: "me",
+        accepted: ["Podgorica"],
+        population: "150.000 habitants",
+        demonym: "podgoricà, podgoricana",
+        languages: "Montenegrí"
+      },
+      {
+        country: "Noruega",
+        capital: "Oslo",
+        flagCode: "no",
+        accepted: ["Oslo"],
+        population: "700.000 habitants",
+        demonym: "osloà, osloana",
+        languages: "Noruec"
+      },
+      {
+        country: "Països Baixos",
+        capital: "Amsterdam",
+        flagCode: "nl",
+        accepted: ["Amsterdam"],
+        population: "900.000 habitants",
+        demonym: "amsterdamès, amsterdamesa",
+        languages: "Neerlandès"
+      },
+      {
+        country: "Polònia",
+        capital: "Varsòvia",
+        flagCode: "pl",
+        accepted: ["Varsòvia", "Varsovia"],
+        population: "1,8 milions d'habitants",
+        demonym: "varsovià, varsoviana",
+        languages: "Polonès"
+      },
+      {
+        country: "Portugal",
+        capital: "Lisboa",
+        flagCode: "pt",
+        accepted: ["Lisboa"],
+        population: "545.000 habitants",
+        demonym: "lisbonès, lisbonesa",
+        languages: "Portuguès"
+      },
+      {
+        country: "Regne Unit",
+        capital: "Londres",
+        flagCode: "gb",
+        accepted: ["Londres", "London"],
+        population: "8,9 milions d'habitants",
+        demonym: "londinenc, londinenca",
+        languages: "Anglès"
+      },
+      {
+        country: "Romania",
+        capital: "Bucarest",
+        flagCode: "ro",
+        accepted: ["Bucarest"],
+        population: "1,8 milions d'habitants",
+        demonym: "bucarestí, bucarestina",
+        languages: "Romanès"
+      },
+      {
+        country: "Rússia",
+        capital: "Moscou",
+        flagCode: "ru",
+        accepted: ["Moscou", "Moscú"],
+        population: "13 milions d'habitants",
+        demonym: "moscovita",
+        languages: "Rus"
+      },
+      {
+        country: "San Marino",
+        capital: "San Marino",
+        flagCode: "sm",
+        accepted: ["San Marino"],
+        population: "4.000 habitants",
+        demonym: "sanmarinès, sanmarinesa",
+        languages: "Italià"
+      },
+      {
+        country: "Suècia",
+        capital: "Estocolm",
+        flagCode: "se",
+        accepted: ["Estocolm", "Estocolmo"],
+        population: "980.000 habitants",
+        demonym: "estocolmès, estocolmesa",
+        languages: "Suec"
+      },
+      {
+        country: "Suïssa",
+        capital: "Berna",
+        flagCode: "ch",
+        accepted: ["Berna"],
+        population: "133.000 habitants",
+        demonym: "bernès, bernesa",
+        languages: "Alemany, francès, italià i romànic"
+      },
+      {
+        country: "Sèrbia",
+        capital: "Belgrad",
+        flagCode: "rs",
+        accepted: ["Belgrad", "Belgrado"],
+        population: "1,2 milions d'habitants",
+        demonym: "belgradès, belgradesa",
+        languages: "Serbi"
+      },
+      {
+        country: "Turquia",
+        capital: "Ankara",
+        flagCode: "tr",
+        accepted: ["Ankara"],
+        population: "5,7 milions d'habitants",
+        demonym: "ankarès, ankaresa",
+        languages: "Turc"
+      },
+      {
+        country: "Txèquia",
+        capital: "Praga",
+        flagCode: "cz",
+        accepted: ["Praga"],
+        population: "1,3 milions d'habitants",
+        demonym: "praguès, praguesa",
+        languages: "Txec"
+      },
+      {
+        country: "Ucraïna",
+        capital: "Kíev",
+        flagCode: "ua",
+        accepted: ["Kíev", "Kíiv", "Kiev", "Kiiv"],
+        population: "2,9 milions d'habitants",
+        demonym: "kíevià, kíeviana",
+        languages: "Ucraïnès"
+      },
+      {
+        country: "Vaticà",
+        capital: "Ciutat del Vaticà",
+        flagCode: "va",
+        accepted: ["Ciutat del Vaticà", "Ciutat del Vatica", "Vaticà", "Vatica"],
+        population: "800 habitants",
+        demonym: "vaticà, vaticana",
+        languages: "Llatí i italià"
+      },
+      {
+        country: "Xipre",
+        capital: "Nicosia",
+        flagCode: "cy",
+        accepted: ["Nicosia", "Nicòsia"],
+        population: "200.000 habitants",
+        demonym: "nicosià, nicosiana",
+        languages: "Grec i turc"
+      }
+    ];
+
+    // Application State Variables
+    let deck = [];
+    let deckIndex = 0;
+    let score = {
+      correct: 0,
+      incorrect: 0,
+      streak: 0,
+      bestStreak: 0
+    };
+    let soundEnabled = true;
+    let isAnswerChecked = false;
+
+    // Web Audio API Synth Effects
+    let audioCtx = null;
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'correct') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now); // C5
+          osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+          osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          osc.start(now);
+          osc.stop(now + 0.35);
+        } else if (type === 'error') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, now); // A3
+          osc.frequency.exponentialRampToValueAtTime(164.81, now + 0.15); // E3
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        } else if (type === 'fanfare') {
+          // Finish round audio chime
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.type = 'triangle';
+            o.frequency.setValueAtTime(freq, now + idx * 0.1);
+            g.gain.setValueAtTime(0.15, now + idx * 0.1);
+            g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.4);
+            o.start(now + idx * 0.1);
+            o.stop(now + idx * 0.1 + 0.4);
+          });
+        }
+      } catch (e) {
+        // Fallback gracefully if Web Audio API is restricted
+      }
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const btn = document.getElementById('soundToggleBtn');
+      const icon = document.getElementById('soundIcon');
+      if (soundEnabled) {
+        icon.className = "fa-solid fa-volume-high text-blue-600";
+        btn.classList.remove('opacity-60');
+      } else {
+        icon.className = "fa-solid fa-volume-xmark text-slate-400";
+        btn.classList.add('opacity-60');
+      }
+    }
+
+    // Helper function to remove accents and normalize text for friendly matching
+    function normalizeText(text) {
+      if (!text) return '';
+      return text
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // Remove diacritics / accents
+        .replace(/·/g, "")              // Remove Catalan punt volat
+        .replace(/['’\- ]/g, "");        // Remove hyphens, spaces and apostrophes
+    }
+
+    // Check whether user answer matches canonical capital or accepted aliases
+    function isCorrectAnswer(userAnswer, countryObj) {
+      const normUser = normalizeText(userAnswer);
+      if (!normUser) return false;
+
+      const normCapital = normalizeText(countryObj.capital);
+      if (normUser === normCapital) return true;
+
+      return countryObj.accepted.some(acc => normalizeText(acc) === normUser);
+    }
+
+    // Shuffle array function (Fisher-Yates)
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // Initialize or Reset a Round
+    function initRound() {
+      // Create shuffled deck of indices [0..48]
+      const indices = Array.from({ length: COUNTRIES_DATA.length }, (_, i) => i);
+      deck = shuffleArray(indices);
+      deckIndex = 0;
+      isAnswerChecked = false;
+      
+      updateScoreboardUI();
+      renderCurrentCountry();
+    }
+
+    function resetGamePrompt() {
+      if (confirm("Vols reiniciar el comptador d'encerts i la ronda actual?")) {
+        score.correct = 0;
+        score.incorrect = 0;
+        score.streak = 0;
+        score.bestStreak = 0;
+        initRound();
+      }
+    }
+
+    // Display current country on card
+    function renderCurrentCountry() {
+      const currentCountryIndex = deck[deckIndex];
+      const country = COUNTRIES_DATA[currentCountryIndex];
+
+      // Update Card Header info
+      document.getElementById('countryBadge').textContent = `País ${deckIndex + 1} de ${COUNTRIES_DATA.length}`;
+      document.getElementById('countryName').textContent = country.country;
+      
+      // Update Flag URL using flagcdn.com
+      const flagImg = document.getElementById('countryFlag');
+      flagImg.src = `https://flagcdn.com/w320/${country.flagCode.toLowerCase()}.png`;
+      flagImg.alt = `Bandera de ${country.country}`;
+
+      // Reset Input Form State
+      const input = document.getElementById('capitalInput');
+      input.value = '';
+      input.disabled = false;
+      input.focus();
+      
+      // Reset Buttons State
+      document.getElementById('checkBtn').disabled = false;
+      document.getElementById('checkBtn').className = "w-full py-3.5 px-6 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center space-x-2 text-base cursor-pointer";
+      
+      const nextBtn = document.getElementById('nextBtn');
+      nextBtn.disabled = true;
+      nextBtn.className = "w-full py-3.5 px-6 bg-slate-200 text-slate-400 font-bold rounded-xl transition-all flex items-center justify-center space-x-2 text-base cursor-not-allowed";
+
+      // Hide Feedback, Hints and Tech Card
+      document.getElementById('feedbackBox').classList.add('hidden');
+      document.getElementById('techCard').classList.add('hidden');
+      document.getElementById('hintBox').classList.add('hidden');
+      
+      isAnswerChecked = false;
+      updateProgressBar();
+    }
+
+    function showHint() {
+      const currentCountryIndex = deck[deckIndex];
+      const country = COUNTRIES_DATA[currentCountryIndex];
+      const cap = country.capital;
+
+      const firstChar = cap.charAt(0);
+      const letterCount = cap.length;
+
+      const hintText = document.getElementById('hintText');
+      hintText.textContent = `Pista: La capital comença per '${firstChar}' i té ${letterCount} lletres.`;
+
+      document.getElementById('hintBox').classList.remove('hidden');
+      document.getElementById('capitalInput').focus();
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      
+      // If answer is already checked, enter key triggers next country
+      if (isAnswerChecked) {
+        nextCountry();
+        return;
+      }
+
+      checkAnswer();
+    }
+
+    function checkAnswer() {
+      const input = document.getElementById('capitalInput');
+      const userVal = input.value.trim();
+
+      if (!userVal) {
+        input.classList.add('shake');
+        setTimeout(() => input.classList.remove('shake'), 400);
+        return;
+      }
+
+      const currentCountryIndex = deck[deckIndex];
+      const country = COUNTRIES_DATA[currentCountryIndex];
+      const correct = isCorrectAnswer(userVal, country);
+
+      isAnswerChecked = true;
+
+      // Update feedback display
+      const feedbackBox = document.getElementById('feedbackBox');
+      const feedbackIcon = document.getElementById('feedbackIcon');
+      const feedbackContent = document.getElementById('feedbackContent');
+
+      feedbackBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-300', 'text-emerald-900', 'bg-rose-50', 'border-rose-300', 'text-rose-900');
+
+      if (correct) {
+        score.correct++;
+        score.streak++;
+        if (score.streak > score.bestStreak) score.bestStreak = score.streak;
+
+        playSound('correct');
+
+        feedbackBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
+        feedbackIcon.className = "fa-solid fa-circle-check text-emerald-600 text-xl mt-0.5";
+        feedbackContent.innerHTML = `
+          <p class="font-extrabold text-base">Molt bé! Resposta correcta! 🎉</p>
+          <p class="text-xs sm:text-sm mt-0.5 text-emerald-800">La capital de <strong>${country.country}</strong> és <strong>${country.capital}</strong>.</p>
+        `;
+
+        document.getElementById('gameCard').classList.add('pulse-success');
+        setTimeout(() => document.getElementById('gameCard').classList.remove('pulse-success'), 600);
+
+      } else {
+        score.incorrect++;
+        score.streak = 0;
+
+        playSound('error');
+
+        feedbackBox.classList.add('bg-rose-50', 'border-rose-300', 'text-rose-900');
+        feedbackIcon.className = "fa-solid fa-circle-xmark text-rose-600 text-xl mt-0.5";
+        feedbackContent.innerHTML = `
+          <p class="font-extrabold text-base">Incorrecte!</p>
+          <p class="text-xs sm:text-sm mt-0.5 text-rose-800">Has escrit: "<em>${escapeHTML(userVal)}</em>". La capital de <strong>${country.country}</strong> és <strong class="underline">${country.capital}</strong>.</p>
+        `;
+
+        document.getElementById('gameCard').classList.add('shake');
+        setTimeout(() => document.getElementById('gameCard').classList.remove('shake'), 400);
+      }
+
+      // Populate & Display Technical Card ("Fitxa Tècnica")
+      document.getElementById('techCardCapitalName').textContent = country.capital;
+      document.getElementById('techCardPopulation').textContent = country.population;
+      document.getElementById('techCardDemonym').textContent = country.demonym;
+      document.getElementById('techCardLanguages').textContent = country.languages;
+      document.getElementById('techCard').classList.remove('hidden');
+
+      // Update Action Buttons
+      input.disabled = true;
+      document.getElementById('checkBtn').disabled = true;
+      document.getElementById('checkBtn').className = "w-full py-3.5 px-6 bg-slate-200 text-slate-400 font-bold rounded-xl transition-all flex items-center justify-center space-x-2 text-base cursor-not-allowed";
+
+      const nextBtn = document.getElementById('nextBtn');
+      nextBtn.disabled = false;
+      nextBtn.className = "w-full py-3.5 px-6 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center space-x-2 text-base cursor-pointer";
+      nextBtn.focus();
+
+      updateScoreboardUI();
+    }
+
+    function nextCountry() {
+      deckIndex++;
+
+      // Check if all 49 countries have been played in this round
+      if (deckIndex >= deck.length) {
+        showRoundCompleteModal();
+      } else {
+        // Re-render card with animation
+        const card = document.getElementById('gameCard');
+        card.classList.remove('card-enter');
+        void card.offsetWidth; // Trigger reflow for re-animation
+        card.classList.add('card-enter');
+        
+        renderCurrentCountry();
+      }
+    }
+
+    function updateScoreboardUI() {
+      document.getElementById('scoreCorrect').textContent = score.correct;
+      document.getElementById('scoreIncorrect').textContent = score.incorrect;
+      document.getElementById('scoreStreak').textContent = score.streak;
+
+      const remaining = COUNTRIES_DATA.length - deckIndex;
+      document.getElementById('remainingCount').textContent = `${remaining} / ${COUNTRIES_DATA.length}`;
+    }
+
+    function updateProgressBar() {
+      const percentage = Math.round((deckIndex / COUNTRIES_DATA.length) * 100);
+      document.getElementById('progressBar').style.width = `${percentage}%`;
+      document.getElementById('progressPercentage').textContent = `${percentage}%`;
+    }
+
+    function openStudyModal() {
+      renderStudyTable(COUNTRIES_DATA);
+      document.getElementById('studyModal').classList.remove('hidden');
+    }
+
+    function closeStudyModal() {
+      document.getElementById('studyModal').classList.add('hidden');
+    }
+
+    function renderStudyTable(list) {
+      const tbody = document.getElementById('studyTableBody');
+      tbody.innerHTML = '';
+
+      list.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition-colors";
+        tr.innerHTML = `
+          <td class="py-2.5 px-3">
+            <img src="https://flagcdn.com/w80/${item.flagCode}.png" alt="${item.country}" class="w-7 h-5 object-cover rounded shadow-sm border border-slate-200">
+          </td>
+          <td class="py-2.5 px-3 font-bold text-slate-900">${escapeHTML(item.country)}</td>
+          <td class="py-2.5 px-3 text-blue-700 font-semibold">${escapeHTML(item.capital)}</td>
+          <td class="py-2.5 px-3 text-slate-500 hidden sm:table-cell text-xs">${escapeHTML(item.languages)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterStudyList() {
+      const query = normalizeText(document.getElementById('modalSearchInput').value);
+      const filtered = COUNTRIES_DATA.filter(item => 
+        normalizeText(item.country).includes(query) || 
+        normalizeText(item.capital).includes(query)
+      );
+      renderStudyTable(filtered);
+    }
+
+    function showRoundCompleteModal() {
+      playSound('fanfare');
+
+      const totalAttempts = score.correct + score.incorrect;
+      const accuracy = totalAttempts > 0 ? Math.round((score.correct / totalAttempts) * 100) : 0;
+
+      document.getElementById('modalFinalCorrect').textContent = score.correct;
+      document.getElementById('modalFinalIncorrect').textContent = score.incorrect;
+      document.getElementById('modalFinalAccuracy').textContent = `${accuracy}%`;
+      document.getElementById('modalFinalBestStreak').textContent = score.bestStreak;
+
+      document.getElementById('roundCompleteModal').classList.remove('hidden');
+    }
+
+    function startNewRound() {
+      document.getElementById('roundCompleteModal').classList.add('hidden');
+      initRound();
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, 
+        tag => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          "'": '&#39;',
+          '"': '&quot;'
+        }[tag] || tag)
+      );
+    }
+
+    window.onload = function() {
+      initRound();
+    };
+  </script>
+</body>
+</html>
